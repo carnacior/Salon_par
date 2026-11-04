@@ -1,0 +1,13 @@
+{% extends "baza.html" %}
+
+{% block title %}Log Accesari{% endblock %}
+
+{% block content %}
+    <h1>Log accesari</h1>
+    
+    {{ sectiune_nr|safe }}
+    {{ html_eroare|safe }}
+    {{ html_lista|safe }}
+    {{ sectiune_statistici|safe }}
+    {{ sectiune_parametri|safe }}
+{% endblock %}

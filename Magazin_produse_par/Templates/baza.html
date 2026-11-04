@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/stil.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}">
+    <title>{% block title %}Salon Par{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>{{ detalii_firma.nume }}</h1>
+        
+        <nav>
+            <ul class="meniu">
+                <li><a href="{% url 'index' %}">Acasa</a></li>
+                <li class="are-submeniu">
+                    <a href="{% url 'produse' %}">Produse</a>
+                    <ul class="submeniu">
+                        <li><a href="{% url 'index' %}#promotii">Promotii</a></li>
+                        <li><a href="{% url 'index' %}#orar">Orar</a></li>
+                        <li><a href="{% url 'produse' %}">Toate produsele</a></li>
+                    </ul>
+                </li>
+                <li><a href="{% url 'despre' %}">Despre</a></li>
+                <li><a href="{% url 'istoric' %}">Istoric</a></li>
+                <li><a href="{% url 'info' %}">Informatii</a></li>
+                <li><a href="{% url 'log' %}">Log</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                <li><a href="{% url 'cos_virtual' %}">Cos</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+    <p>IP vizitator: {{ request.ip }}</p>
+    <p>
+        {{ detalii_firma.nume }} | Infiintat in {{ detalii_firma.an_infiintare }} | 
+        Contact: {{ detalii_firma.email }} / {{ detalii_firma.telefon }} | 
+        Adresa: {{ detalii_firma.adresa }} | Program: {{ detalii_firma.program }}
+    </p>
+    <p>&copy; {{ detalii_firma.an_infiintare }} - Toate drepturile rezervate</p>
+</footer>
+</body>
+</html>

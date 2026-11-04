@@ -1,0 +1,66 @@
+
+.meniu {
+    list-style: none; 
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    display: flex; 
+    flex-wrap: wrap;
+}
+
+.meniu > li {
+    position: relative; 
+}
+
+.meniu > li > a {
+    display: block;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.meniu > li > a:hover {
+    background-color: #555;
+}
+
+
+.submeniu {
+    display: none; 
+    position: absolute; 
+    top: 100%; 
+    left: 0;
+    background-color: #444;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-width: 200px;
+    z-index: 10; 
+}
+
+.submeniu li a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+}
+
+.submeniu li a:hover {
+    background-color: #666;
+}
+
+.are-submeniu:hover .submeniu {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .meniu {
+        flex-direction: column; 
+    }
+
+    .submeniu {
+        position: static; 
+        width: 100%;
+    }
+}

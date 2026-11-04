@@ -1,0 +1,24 @@
+{% extends "baza.html" %}
+{% load static %}
+
+{% block title %}Acasa - Salon Par{% endblock %}
+
+{% block content %}
+    <h1>Bine ati venit la {{ detalii_firma.nume }}</h1>
+    <img src="{% static 'imagini/banner.jpg' %}" alt="Banner Salon Par" class="imagine-site">   
+
+    <section id="descriere">
+        <h2>Despre magazinul nostru</h2>
+        <p>Aici vom vinde cele mai bune produse pentru ingrijirea parului.</p>
+    </section>
+
+    <section id="orar">
+        <h2>Orar de lucru</h2>
+        <p>Programul nostru este: {{ detalii_firma.program }}.</p>
+    </section>
+
+    <section id="promotii">
+        <h2>Promotii curente</h2>
+        <p>Momentan nu avem promotii active. Reveniti in curand!</p>
+    </section>
+{% endblock %}
