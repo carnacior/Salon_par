@@ -256,10 +256,10 @@ class Produs(models.Model):
     imagine = models.ImageField(upload_to='produse/', null=True, blank=True)
     data_adaugare = models.DateTimeField(auto_now_add=True)
 
-    categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE, related_name='produse')
+    categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE, related_name='produse')#
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='produse')
     ambalaj = models.ForeignKey(Ambalaj, on_delete=models.SET_NULL, null=True, related_name='produse')
-    ingrediente = models.ManyToManyField(Ingredient, related_name='produse')
+    ingrediente = models.ManyToManyField(Ingredient, related_name='produse') 
     promotii = models.ManyToManyField(Promotie, related_name='produse', blank=True)
 
     def __str__(self):

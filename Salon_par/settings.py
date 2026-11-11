@@ -32,13 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'Magazin_produse_par.apps.MagazinProduseParConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Magazin_produse_par.apps.MagazinProduseParConfig',
+    
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+# titlul
+{% block title %}Admin Magazin Par{% endblock %}
+
+# sigla
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'imagini/logo-admin.png' %}" alt="Logo Magazin" style="height: 70px; margin-right: 15px; vertical-align: middle;">
+        <span style="vertical-align: middle;">Administrare Magazin Par</span>
+    </a>
+</div>
+{% endblock %}
+
+#culorile
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    :root {
+        --body-bg: #03021b; 
+        
+        --primary: #1e3b21; 
+        --secondary: #0f172a;
+        
+        --selected-row: #d1fae5; 
+        
+        --breadcrumbs-bg: #475569; 
+        
+        --link-fg: #2563eb;
+    }
+
+    #site-name a {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: white;
+    }
+    
+    #header {
+        padding: 15px 40px;
+    }
+</style>
+{% endblock %}
