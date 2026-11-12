@@ -53,7 +53,7 @@ class ProdusAdmin(admin.ModelAdmin):
     list_filter = ('categorie', 'brand', 'este_vegan')
     
     #3 - se regaseste la toate modelele
-    search_fields = ('nume', 'descriere')
+    search_fields = ('nume', 'descriere', 'taguri')
     search_help_text = "Puteti cauta produsele dupa nume sau cuvinte din descriere."
     
     #10
@@ -69,6 +69,12 @@ class ProdusAdmin(admin.ModelAdmin):
             '<b style="color: green; font-style: italic;">{} RON</b>',
             obj.pret
         )
+        
+    @admin.display(description="Tag-uri")
+    def afiseaza_taguri(self, obj):
+        if obj.taguri:
+            return ", ".join(obj.taguri)
+        return "-"
 
     #7
     fieldsets = (
@@ -77,7 +83,7 @@ class ProdusAdmin(admin.ModelAdmin):
         }),
         ('Informatii Optionale (Click pentru a extinde)', { # pot fi null, blank sau optionale
             'classes': ('collapse',), # sa fie colapsabil
-            'fields': ('descriere', 'volum_ml', 'data_expirare', 'este_vegan', 'lista_beneficii', 'imagine', 'ambalaj', 'ingrediente', 'promotii'),
+            'fields': ('descriere', 'volum_ml', 'data_expirare', 'este_vegan', 'lista_beneficii', 'taguri', 'imagine', 'ambalaj', 'ingrediente', 'promotii'),
         }),
     )
 

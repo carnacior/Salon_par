@@ -6,10 +6,15 @@ from datetime import datetime
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Ambalaj
-from django.shortcuts import render  
 
 from django.contrib import messages
 from django.shortcuts import redirect
+
+from .models import Produs, Ingredient, Categorie
+
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+
 
 ZILE = [
     "Luni", "Marti", "Miercuri", "Joi",
@@ -74,14 +79,14 @@ class Accesare:
 
 def index(request):
     inregistreaza(request)
-    return render(request, "index.html")
+    return render(request, "Magazin_produse_par/index.html")
 
 def info(request):
     a = request.GET.get("data")
     aa = inregistreaza(request)
     messages.debug(request, "Modul DEBUG activ. Serverul ruleaza optim.")
     data_text = aa.get_data(a)
-    return render(request, "info.html", {"data_afisata": data_text})
+    return render(request, "Magazin_produse_par/info.html", {"data_afisata": data_text})
 
 
 
@@ -238,23 +243,23 @@ def log(request):
         <p>Cea mai putin accesata pagina: <b>{cea_mai_putin}</b> ({nr_min} accesari)</p>
         """
 
-        return render(request, "log.html", {
-        "sectiune_nr": sectiune_nr,
-        "html_eroare": html_eroare,
-        "html_lista": html_lista,
-        "sectiune_statistici": sectiune_statistici,
-        "sectiune_parametri": sectiune_parametri,
-        })
+    return render(request, "Magazin_produse_par/log.html", {
+    "sectiune_nr": sectiune_nr,
+    "html_eroare": html_eroare,
+    "html_lista": html_lista,
+    "sectiune_statistici": sectiune_statistici,
+    "sectiune_parametri": sectiune_parametri,
+    })
     
 def despre(request):
     inregistreaza(request)
     messages.info(request, "Afla povestea salonului nostru si al parului cu care lucram.") 
-    return render(request, "despre.html")
+    return render(request, "Magazin_produse_par/despre.html")
 
 def istoric(request):
     inregistreaza(request)
     messages.warning(request, "Atentie: Unele date din istoricul salonului sunt inca in curs de scriere.")
-    return render(request, "istoric.html")  
+    return render(request, "Magazin_produse_par/istoric.html")  
     
 def afisare_ambalaje(request):
     nrPagina=request.GET.get("pagina", 1)
@@ -267,7 +272,7 @@ def afisare_ambalaje(request):
     except EmptyPage:
         obPagina=None
         mesajEroare = "Nu mai sunt ambalaje"
-    return render(request, 'ambalaje.html',
+    return render(request, 'Magazin_produse_par/ambalaje.html',
                     {
                         'pagina': obPagina,
                         'eroare': mesajEroare
@@ -292,21 +297,65 @@ def detalii_accesare(request, id):
             <h1>Nu exista accesarea cu id-ul {id}</h1>
         </body></html>""")
     
+def _prelucreaza_produse(request, queryset_initial):
+    # sortare
+    sort_param = request.GET.get('sort', 'a')
+    col_param = request.GET.get('col', 'pret')
+    if sort_param == 'd':
+        queryset_initial = queryset_initial.order_by(f'-{col_param}')
+    else:
+        queryset_initial = queryset_initial.order_by(col_param)
+
+    # filtrare
+    taguri_active = request.GET.getlist('tag')
+    if taguri_active:
+        for tag_text in taguri_active:
+            queryset_initial = queryset_initial.filter(taguri__contains=[tag_text])
+
+    toate_tagurile = set()
+    for p in Produs.objects.all():
+        if p.taguri:
+            toate_tagurile.update(p.taguri)
+
+    # paginarea
+    paginator = Paginator(queryset_initial, settings.PROD_PER_PAG)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return {
+        'page_obj': page_obj,
+        'toate_tagurile': list(toate_tagurile),
+        'taguri_active': taguri_active,
+        'sort_curent': sort_param,
+        'col_curenta': col_param,
+        'STOC_MIN': settings.STOC_MIN,
+    }
+
 def produse(request):
     inregistreaza(request)
-    messages.info(request, "Catalogul este in curs de actualizare. Reveniti curand!")
-    return render(request, "in_lucru.html")
+    context = _prelucreaza_produse(request, Produs.objects.all())
+    return render(request, "Magazin_produse_par/produse.html", context)
+
+def categorie_produse(request, slug):
+    inregistreaza(request)
+    categorie_curenta = get_object_or_404(Categorie, nume__iexact=slug.replace('-', ' '))
+    produse_categorie = Produs.objects.filter(categorie=categorie_curenta)
+    
+    context = _prelucreaza_produse(request, produse_categorie)
+    context['categorie_curenta'] = categorie_curenta
+    
+    return render(request, "Magazin_produse_par/produse.html", context)
 
 def contact(request):
     inregistreaza(request)
     messages.warning(request, "Timpul mediu de raspuns la programari este de 24 de ore.") 
-    return render(request, "in_lucru.html")
+    return render(request, "Magazin_produse_par/in_lucru.html")
 
 def cos_virtual(request):
     inregistreaza(request)
     messages.error(request, "Eroare: Cosul este gol sau nu exista")
     messages.error(request, "Eroare: Nu sunteti logat")
-    return render(request, "in_lucru.html")
+    return render(request, "Magazin_produse_par/in_lucru.html")
 
 
 
@@ -320,4 +369,18 @@ def trimite_mesaje(request):
     
     return redirect('index')
 
+def detalii_produs(request, slug):
+    inregistreaza(request)
+    
+    #cautam dupa slug, daca nu exista ne da 404
+    produs = get_object_or_404(Produs, slug=slug)
+    
+    #luam din aceeasi categorie, excluzand produsul curent si le amestecam aleatoriu
+    produse_similare = Produs.objects.filter(categorie=produs.categorie).exclude(id=produs.id).order_by('?')[:settings.K_PRODUSE_SIMILARE]
+    
+    return render(request, "Magazin_produse_par/produs_detalii.html", {
+        "produs": produs,
+        "produse_similare": produse_similare,
+        'STOC_MIN': settings.STOC_MIN,
+    })
 

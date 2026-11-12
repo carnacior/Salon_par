@@ -1,0 +1,89 @@
+{% extends "Magazin_produse_par/baza.html" %}
+{% load static %}
+
+{% block title %}{{ produs.nume }}{% endblock %}
+
+{% block content %}
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;"><!-- imagine in stanga si scris in dreapta pe ecran mare, una sub alta pe telefon -->
+        <!-- imagine -->
+        <div style="flex: 1; min-width: 300px;">
+            {% if produs.imagine %}
+                <img src="{{ produs.imagine.url }}" alt="{{ produs.nume }}" style="width: 100%; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            {% else %}
+                <div style="width: 100%; height: 300px; background-color: #eee; display: flex; align-items: center; justify-content: center; border-radius: 10px;">
+                    Imagine indisponibila
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- detalii -->
+        <div style="flex: 1; min-width: 300px;">
+            <h1 style="margin-top: 0;">{{ produs.nume }}</h1>
+            <p><strong>Categorie:</strong> 
+                <a href="{% url 'categorie_produse' slug=produs.categorie.nume|lower|slugify %}" style="text-decoration: none; display: inline-block; cursor: pointer;">
+                    <span style="background-color: {{ produs.categorie.culoare }}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.9em;">
+                        <i class="fa {{ produs.categorie.sigla }}"></i> {{ produs.categorie.nume }}
+                    </span>
+                </a>
+            </p>
+            <p><strong>Brand:</strong> {{ produs.brand.nume }}</p>
+            <p><strong>Pret:</strong> <span style="color: #e74c3c; font-size: 1.5em; font-weight: bold;">{{ produs.pret }} RON</span></p>
+            <p><strong>Descriere:</strong><br> {{ produs.descriere }}</p>
+            <p><strong>Stoc:</strong> {{ produs.stoc }} bucati</p>
+            
+            {% if produs.stoc <= STOC_MIN %}
+                <div style="color: red; font-weight: bold; border: 2px dashed red; padding: 10px; border-radius: 5px; display: inline-block; margin-bottom: 15px;">
+                    ATENTIE: Stoc limitat!
+                </div>
+            {% endif %}
+
+            <!-- tags -->
+            {% if produs.taguri %}
+            <div style="margin-top: 15px;">
+                <strong>Tag-uri:</strong><br>
+                {% for tag in produs.taguri %}
+                    <a href="{% url 'produse' %}?tag={{ tag }}" style="display: inline-block; padding: 5px 10px; margin: 5px 5px 0 0; border-radius: 15px; text-decoration: none; background-color: #e2e8f0; color: black;">
+                        #{{ tag }}
+                    </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- beneficii(daca exista) -->
+            {% if produs.lista_beneficii %}
+                <p><strong>Beneficii:</strong> 
+                    {% for beneficiu in produs.lista_beneficii %}<!-- django transforma din json in lista ca sa putem itera -->
+                        <span style="background: #e1f5fe; padding: 3px 8px; border-radius: 5px; margin-right: 5px; display: inline-block;">{{ beneficiu }}</span>
+                    {% endfor %}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr style="margin: 40px 0; border: 0; border-top: 1px solid #ddd;">
+
+    <!-- aceeasi categorie -->
+    <h2>Produse din aceeasi categorie</h2>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        {% for p in produse_similare %}
+            <div style="border: 1px solid #ddd; padding: 10px; width: 200px; border-radius: 8px;">
+                <!-- link pe imagine -->
+                <a href="{{ p.get_absolute_url }}">
+                    {% if p.imagine %}
+                        <img src="{{ p.imagine.url }}" alt="{{ p.nume }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 5px;">
+                    {% else %}
+                        <div style="width: 100%; height: 150px; background-color: #eee; display: flex; align-items: center; justify-content: center;">Fara imagine</div>
+                    {% endif %}
+                </a>
+                <!-- link pe nume -->
+                <h4 style="margin: 10px 0 5px 0;">
+                    <a href="{{ p.get_absolute_url }}" style="text-decoration: none; color: #333;">{{ p.nume }}</a>
+                </h4>
+                <p style="color: #e74c3c; font-weight: bold; margin: 0;">{{ p.pret }} RON</p>
+            </div>
+        {% empty %}
+            <p>Nu exista alte produse in aceasta categorie.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

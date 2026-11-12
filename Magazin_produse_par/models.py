@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.postgres.fields import ArrayField
 
 class Ambalaj(models.Model):
     class MaterialChoices(models.TextChoices):
@@ -253,6 +253,12 @@ class Produs(models.Model):
         default=list,
         help_text="Lista de beneficii (ex: ['hidratare', 'luciu'])"
     )
+    taguri = ArrayField(
+        models.CharField(max_length=50),
+        blank=True,
+        default=list,
+        help_text="Tag-uri sub forma de cuvinte cheie"
+    )
     imagine = models.ImageField(upload_to='produse/', null=True, blank=True)
     data_adaugare = models.DateTimeField(auto_now_add=True)
 
@@ -261,9 +267,13 @@ class Produs(models.Model):
     ambalaj = models.ForeignKey(Ambalaj, on_delete=models.SET_NULL, null=True, related_name='produse')
     ingrediente = models.ManyToManyField(Ingredient, related_name='produse') 
     promotii = models.ManyToManyField(Promotie, related_name='produse', blank=True)
-
+    
     def __str__(self):
         return self.nume
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('detalii_produs', kwargs={'slug': self.slug})
 
 
 class VariantaProdus(models.Model):

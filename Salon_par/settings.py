@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     
 ]
 
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'Magazin_produse_par.ctx_processors.detalii_firma',
+                'Magazin_produse_par.ctx_processors.meniu_categorii',
             ],
         },
     },
@@ -167,3 +169,9 @@ MESSAGE_TAGS = {
     message_constants.WARNING: 'warning',
     message_constants.ERROR: 'error',
 }
+
+K_PRODUSE_SIMILARE = 3
+PROD_PER_PAG = 6
+STOC_MIN = 10
+
+

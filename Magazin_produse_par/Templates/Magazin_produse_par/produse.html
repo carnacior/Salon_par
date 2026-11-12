@@ -1,0 +1,122 @@
+{% extends "Magazin_produse_par/baza.html" %}
+{% load static %}
+
+{% block title %}Toate Produsele{% endblock %}
+
+{% block content %}
+    <h1>Toate Produsele</h1>
+
+    {% if categorie_curenta %}
+    <div style="background: {{ categorie_curenta.culoare }}20; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid {{ categorie_curenta.culoare }};">
+        <h2 style="margin-top: 0;">
+            <i class="fa {{ categorie_curenta.sigla }}" style="color: {{ categorie_curenta.culoare }};"></i> 
+            Categoria: {{ categorie_curenta.nume }}
+        </h2>
+        <p>{{ categorie_curenta.descriere }}</p>
+    </div>
+    {% endif %}
+
+    <!-- sortare -->
+    <div style="margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+        <strong>Sorteaza dupa:</strong>
+        <a href="?col=pret&sort={% if sort_curent == 'a' and col_curenta == 'pret' %}d{% else %}a{% endif %}">Pret 
+            {% if col_curenta == 'pret' %}{% if sort_curent == 'a' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+        </a> | 
+        <a href="?col=nume&sort={% if sort_curent == 'a' and col_curenta == 'nume' %}d{% else %}a{% endif %}">Nume
+            {% if col_curenta == 'nume' %}{% if sort_curent == 'a' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+        </a>
+    </div>
+
+    <!-- filtrare -->
+    <div style="margin-bottom: 20px;">
+        <strong>Filtreaza dupa tag-uri:</strong><br>
+        {% for tag in toate_tagurile %}
+            <a href="?tag={{ tag }}{% for t in taguri_active %}{% if t != tag %}&tag={{ t }}{% endif %}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}" 
+                style="display: inline-block; padding: 5px 10px; margin: 5px; border-radius: 15px; text-decoration: none; 
+                    background-color: {% if tag in taguri_active %}#1e293b{% else %}#e2e8f0{% endif %}; 
+                    color: {% if tag in taguri_active %}white{% else %}black{% endif %};">
+                #{{ tag }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <!-- tag activ -->
+    {% if taguri_active %}
+        <div style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+            <strong>Filtre active:</strong>
+            {% for tag in taguri_active %}
+                <span style="background: #1e293b; color: white; padding: 3px 8px; border-radius: 15px; margin-right: 5px;">
+                    #{{ tag }} 
+                    <a href="?{% for t in taguri_active %}{% if t != tag %}tag={{ t }}&{% endif %}{% endfor %}sort={{ sort_curent }}&col={{ col_curenta }}" style="color: red; text-decoration: none; font-weight: bold;">x</a>
+                </span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- paginare -->
+    <p>
+        Se afiseaza produsele intre 
+        <b>{{ page_obj.start_index }}</b> si 
+        <b>{{ page_obj.end_index }}</b> 
+        din totalul de <b>{{ page_obj.paginator.count }}</b> produse.
+    </p>
+    <div style="margin-bottom: 20px; text-align: center; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">&laquo; Prima</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">Anterioara</a>
+        {% endif %}
+
+        <span><b>Pagina {{ page_obj.number }} din {{ page_obj.paginator.num_pages }}</b></span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">Urmatoarea</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">Ultima &raquo;</a>
+        {% endif %}
+    </div>
+
+    <!-- lista produse -->
+    <div class="grid-produse" style="display: flex; flex-wrap: wrap; gap: 20px;">
+        {% for produs in page_obj %}
+            <div class="card-produs" style="border: 1px solid #ddd; padding: 15px; width: 250px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                {% if produs.imagine %}
+                    <img src="{{ produs.imagine.url }}" alt="{{ produs.nume }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px;">
+                {% else %}
+                    <div style="width: 100%; height: 200px; background-color: #eee; display: flex; align-items: center; justify-content: center; color: #888; border-radius: 5px;">Imagine indisponibila</div>
+                {% endif %}
+                <h3 style="margin-top: 10px;"><a href="{{ produs.get_absolute_url }}" style="text-decoration: none; color: #1e293b;">{{ produs.nume }}</a></h3>
+                <p><strong>Brand:</strong> {{ produs.brand.nume }}</p>
+                <p>
+                    <strong>Categorie:</strong> 
+                    <a href="{% url 'categorie_produse' slug=produs.categorie.nume|lower|slugify %}" style="text-decoration: none;">
+                        <span style="background-color: {{ produs.categorie.culoare }}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.9em;">
+                            <i class="fa {{ produs.categorie.sigla }}"></i> {{ produs.categorie.nume }}
+                        </span>
+                    </a>
+                </p>
+                <p><strong>Pret:</strong> {{ produs.pret }} RON</p>
+                {% if produs.stoc <= STOC_MIN %}
+                    <p style="color: red; font-weight: bold; border: 2px solid red; padding: 5px; text-align: center; border-radius: 5px;">
+                        STOC LIMITAT!
+                    </p>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>Nu exista produse conform filtrelor selectate.</p>
+        {% endfor %}
+    </div>
+
+    <!-- controale paginare -->
+    <div style="margin-top: 20px; text-align: center;">
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">&laquo; Prima</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">Anterioara</a>
+        {% endif %}
+
+        <span>Pagina {{ page_obj.number }} din {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">Urmatoarea</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% for t in taguri_active %}&tag={{ t }}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}">Ultima &raquo;</a>
+        {% endif %}
+    </div>
+{% endblock %}

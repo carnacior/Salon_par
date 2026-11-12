@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{% static 'css/stil.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/nav.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>{% block title %}Salon Par{% endblock %}</title>
 </head>
 <body>
@@ -18,9 +19,11 @@
                 <li class="are-submeniu">
                     <a href="{% url 'produse' %}">Produse</a>
                     <ul class="submeniu">
-                        <li><a href="{% url 'index' %}#promotii">Promotii</a></li>
-                        <li><a href="{% url 'index' %}#orar">Orar</a></li>
                         <li><a href="{% url 'produse' %}">Toate produsele</a></li>
+                        <hr style="margin: 5px 0; border: 0; border-top: 1px solid #555;">
+                        {% for cat in categorii_meniu %}
+                            <li><a href="{% url 'categorie_produse' slug=cat.nume|lower|slugify %}">{{ cat.nume }}</a></li>
+                        {% endfor %}
                     </ul>
                 </li>
                 <li><a href="{% url 'despre' %}">Despre</a></li>

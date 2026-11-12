@@ -17,6 +17,8 @@ urlpatterns = [
     path('contact', views.contact, name="contact"),
     path('cos_virtual', views.cos_virtual, name="cos_virtual"),
     path('trimite_mesaje', views.trimite_mesaje, name="trimite_mesaje"),
+    path('produs/<slug:slug>/', views.detalii_produs, name="detalii_produs"),
+    path('categorii/<slug:slug>/', views.categorie_produse, name="categorie_produse"),
 ]
 
 if settings.DEBUG:
