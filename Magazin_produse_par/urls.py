@@ -19,6 +19,14 @@ urlpatterns = [
     path('trimite_mesaje', views.trimite_mesaje, name="trimite_mesaje"),
     path('produs/<slug:slug>/', views.detalii_produs, name="detalii_produs"),
     path('categorii/<slug:slug>/', views.categorie_produse, name="categorie_produse"),
+    
+    path('inregistrare/', views.inregistrare, name="inregistrare"),
+    path('login/', views.login_view, name="login"),
+    path('logout/', views.logout_view, name="logout"),
+    path('profil/', views.profil, name="profil"),
+    
+    path('schimba-parola/', views.schimba_parola, name="schimba_parola"),
+    path('editeaza-profil/', views.editeaza_profil, name="editeaza_profil"),
 ]
 
 if settings.DEBUG:

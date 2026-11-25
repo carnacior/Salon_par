@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import AbstractUser
 
 class Ambalaj(models.Model):
     class MaterialChoices(models.TextChoices):
@@ -294,3 +295,132 @@ class VariantaProdus(models.Model):
 
     def __str__(self):
         return f"{self.produs.nume} - {self.culoare}"
+    
+#lab6
+
+class CustomUser(AbstractUser):
+    telefon = models.CharField(max_length=15, null=True, blank=True, help_text="Format: 07xx xxx xxx")
+    tara = models.CharField(max_length=50, null=True, blank=True)
+    judet = models.CharField(max_length=50, null=True, blank=True)
+    class Meta:
+            verbose_name = "Utilizator"
+            verbose_name_plural = "Utilizatori"
+
+    def __str__(self):
+        return self.username
+
+class Profil(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profil')
+    strada = models.CharField(max_length=255, null=True, blank=True)
+    data_nasterii = models.DateField(null=True, blank=True)
+    bio = models.TextField(null=True, blank=True)
+    class Meta:
+        verbose_name = "Profil"
+        verbose_name_plural = "Profiluri"
+
+    def __str__(self):
+        return self.user.username
+
+class Comanda(models.Model):
+    STATUS_CHOICES = (
+        ('in_asteptare', 'In asteptare'),
+        ('procesata', 'Procesata'),
+        ('expediata', 'Expediata'),
+        ('anulata', 'Anulata'),
+    )
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='comenzi')
+    data_inregistrarii = models.DateTimeField(auto_now_add=True)
+    prin_curier = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_asteptare')
+    class Meta:
+            verbose_name = "Comanda"
+            verbose_name_plural = "Comenzi"
+
+    def __str__(self):
+        return f"Comanda #{self.id} - {self.utilizator.username}"
+
+class ComandaProdus(models.Model):
+    comanda = models.ForeignKey(Comanda, on_delete=models.CASCADE)
+    produs = models.ForeignKey(Produs, on_delete=models.CASCADE)
+    cantitate = models.PositiveIntegerField(default=1)
+    class Meta:
+                verbose_name = "Comanda-Produs"
+                verbose_name_plural = "Comanda-Produs"
+
+    def __str__(self):
+        return f"{self.cantitate}x {self.produs.nume} (Comanda #{self.comanda.id})"
+
+class Angajat(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='angajat')
+    salariu = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    data_angajarii = models.DateField(auto_now_add=True)
+    class Meta:
+            verbose_name = "Angajat"
+            verbose_name_plural = "Angajati"
+
+    def __str__(self):
+        return f"Angajat: {self.user.username}"
+
+class Departament(models.Model):
+    nume = models.CharField(max_length=100, unique=True)
+    descriere = models.TextField(null=True, blank=True)
+    sef = models.ForeignKey(Angajat, on_delete=models.SET_NULL, null=True, blank=True, related_name='departamente_conduse')
+
+    class Meta:
+                verbose_name = "Departament"
+                verbose_name_plural = "Departamente"
+    
+    def __str__(self):
+        return self.nume
+
+class Review(models.Model):
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    produs = models.ForeignKey(Produs, on_delete=models.CASCADE, related_name='reviews')
+    nota = models.PositiveIntegerField(default=5)
+    comentariu = models.TextField(null=True, blank=True)
+    data = models.DateTimeField(auto_now_add=True)
+    class Meta:
+                verbose_name = "Review"
+                verbose_name_plural = "Review-uri"
+
+    def __str__(self):
+        return f"Review {self.nota} stele - {self.produs.nume}"
+
+class Voucher(models.Model):
+    cod = models.CharField(max_length=50, unique=True)
+    procent_reducere = models.DecimalField(max_digits=5, decimal_places=2)
+    utilizatori = models.ManyToManyField(CustomUser, through='UtilizatorVoucher', related_name='vouchere')
+
+    class Meta:
+                verbose_name = "Voucher"
+                verbose_name_plural = "Vouchere"
+    
+    def __str__(self):
+        return f"Voucher {self.cod} (-{self.procent_reducere}%)"
+
+class UtilizatorVoucher(models.Model):
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE)
+    data_acordarii = models.DateField(auto_now_add=True)
+    class Meta:
+                    verbose_name = "Utilizator-Voucher"
+                    verbose_name_plural = "Utilizator-Voucher"
+
+class ListaFavorite(models.Model):
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='liste_favorite')
+    nume_lista = models.CharField(max_length=100, default='Lista mea')
+    produse = models.ManyToManyField(Produs, through='ListaFavoriteProdus', related_name='liste_in_care_apare')
+    
+    class Meta:
+                verbose_name = "Lista_Favorite"
+                verbose_name_plural = "Liste_Favorite"
+
+    def __str__(self):
+        return f"{self.nume_lista} ({self.utilizator.username})"
+
+class ListaFavoriteProdus(models.Model):
+    lista_favorite = models.ForeignKey(ListaFavorite, on_delete=models.CASCADE)
+    produs = models.ForeignKey(Produs, on_delete=models.CASCADE)
+    class Meta:
+                        verbose_name = "ListaFavorite-Produs"
+                        verbose_name_plural = "ListaFavorite-Produs"

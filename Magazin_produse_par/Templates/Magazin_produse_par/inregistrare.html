@@ -1,0 +1,32 @@
+{% extends "Magazin_produse_par/baza.html" %}
+
+{% block title %}Inregistrare{% endblock %}
+
+{% block content %}
+    <h1>Creeaza un cont nou</h1>
+    
+    <form method="post" style="max-width: 500px; margin: auto;">
+        {% csrf_token %}
+        
+        <!--erorile generale-->
+        {{ form.non_field_errors }}
+        
+        <!-- iteram toate campurile -->
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold;">{{ field.label_tag }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="display: block; color: #666; font-size: 0.8em;">{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                    <div style="color: red; font-size: 0.9em;">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" style="padding: 10px 20px; background: #1e293b; color: white; border: none; border-radius: 5px; cursor: pointer;">Inregistreaza-te</button>
+    </form>
+{% endblock %}

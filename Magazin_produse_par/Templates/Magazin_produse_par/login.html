@@ -1,0 +1,37 @@
+{% extends "Magazin_produse_par/baza.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <h1>Autentificare</h1>
+    
+    <form method="post" style="max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+        {% csrf_token %}
+        
+        {{ form.non_field_errors }}
+        
+        <div style="margin-bottom: 15px;">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {{ form.password.errors }}
+        </div>
+        
+        <!-- checkboxul -->
+        <div style="margin-bottom: 15px;">
+            {{ form.tine_minte }} 
+            <label for="{{ form.tine_minte.id_for_label }}">{{ form.tine_minte.label }}</label>
+        </div>
+        
+        <button type="submit" style="width: 100%; padding: 10px; background: #1e293b; color: white; border: none; border-radius: 5px; cursor: pointer;">Log In</button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 15px;">
+        Nu ai cont? <a href="{% url 'inregistrare' %}">Inregistreaza-te aici</a>
+    </p>
+{% endblock %}

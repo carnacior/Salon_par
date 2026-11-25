@@ -1,0 +1,18 @@
+{% extends "Magazin_produse_par/baza.html" %}
+{% block title %}Editeaza Profilul{% endblock %}
+{% block content %}
+    <h1>Editeaza Datele Personale</h1>
+    <form method="post" style="max-width: 600px; margin: auto;">
+        {% csrf_token %}
+        
+        <h2>Date Cont</h2>
+        {{ u_form.as_p }}
+        
+        <hr style="margin: 20px 0;">
+        
+        <h2>Date Profil</h2>
+        {{ p_form.as_p }}
+        
+        <button type="submit" style="padding: 10px 20px; background: #2ecc71; color: white; border: none; border-radius: 5px; margin-top: 15px;">Salveaza Modificarile</button>
+    </form>
+{% endblock %}

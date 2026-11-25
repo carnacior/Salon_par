@@ -1,0 +1,19 @@
+{% extends "Magazin_produse_par/baza.html" %}
+{% block title %}Schimba Parola{% endblock %}
+{% block content %}
+    <h1>Schimba Parola</h1>
+    <form method="post" style="max-width: 500px; margin: auto; border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                {{ field.label_tag }}<br>
+                {{ field }}
+                {% if field.errors %}<div style="color: red;">{{ field.errors }}</div>{% endif %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" style="padding: 10px 20px; background: #1e293b; color: white; border: none; border-radius: 5px;">Salveaza Parola Noua</button>
+    </form>
+{% endblock %}

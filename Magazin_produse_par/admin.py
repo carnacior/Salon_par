@@ -2,7 +2,12 @@ from django.contrib import admin
 from django.utils.html import format_html
 import csv
 from django.http import HttpResponse
-from .models import Ambalaj, Categorie, Brand, Ingredient, Promotie, Produs, VariantaProdus
+from django.contrib.auth.admin import UserAdmin
+from .models import (
+    Ambalaj, Categorie, Brand, Ingredient, Promotie, Produs, VariantaProdus,
+    CustomUser, Profil, Comanda, ComandaProdus, Angajat, Departament, 
+    Review, Voucher, UtilizatorVoucher, ListaFavorite, ListaFavoriteProdus
+)
 
 #8
 admin.site.site_header = "Administrare Magazin Par"
@@ -119,3 +124,74 @@ class VariantaProdusAdmin(admin.ModelAdmin):
     list_display = ('produs', 'culoare', 'volum_extra_ml')
     search_fields = ('produs__nume', 'culoare')
     search_help_text = "Cautati varianta dupa numele produsului parinte sau culoare."
+############################    
+class ProfilInline(admin.StackedInline):
+    model = Profil
+    can_delete = False
+    verbose_name = "Detalii Profil"
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (ProfilInline,)
+    
+    fieldsets = UserAdmin.fieldsets + (
+        ('Informatii Suplimentare', {'fields': ('telefon', 'tara', 'judet')}),
+    )
+
+admin.site.register(CustomUser, CustomUserAdmin)
+
+@admin.register(Profil)
+class ProfilAdmin(admin.ModelAdmin):
+    list_display = ('user', 'strada', 'data_nasterii')
+    search_fields = ('user__username', 'strada')
+
+
+    
+#########
+
+
+@admin.register(Comanda)
+class ComandaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'utilizator', 'data_inregistrarii', 'status', 'prin_curier')
+    list_filter = ('status', 'prin_curier', 'data_inregistrarii')
+    search_fields = ('utilizator__username', 'id')
+
+@admin.register(ComandaProdus)
+class ComandaProdusAdmin(admin.ModelAdmin):
+    list_display = ('comanda', 'produs', 'cantitate')
+    search_fields = ('comanda__id', 'produs__nume')
+
+@admin.register(Angajat)
+class AngajatAdmin(admin.ModelAdmin):
+    list_display = ('user', 'salariu', 'data_angajarii')
+    search_fields = ('user__username', 'user__first_name', 'user__last_name')
+
+@admin.register(Departament)
+class DepartamentAdmin(admin.ModelAdmin):
+    list_display = ('nume', 'sef')
+    search_fields = ('nume',)
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('produs', 'utilizator', 'nota', 'data')
+    list_filter = ('nota', 'data')
+    search_fields = ('produs__nume', 'utilizator__username', 'comentariu')
+
+@admin.register(Voucher)
+class VoucherAdmin(admin.ModelAdmin):
+    list_display = ('cod', 'procent_reducere')
+    search_fields = ('cod',)
+
+@admin.register(UtilizatorVoucher)
+class UtilizatorVoucherAdmin(admin.ModelAdmin):
+    list_display = ('utilizator', 'voucher', 'data_acordarii')
+    search_fields = ('utilizator__username', 'voucher__cod')
+
+@admin.register(ListaFavorite)
+class ListaFavoriteAdmin(admin.ModelAdmin):
+    list_display = ('nume_lista', 'utilizator')
+    search_fields = ('nume_lista', 'utilizator__username')
+
+@admin.register(ListaFavoriteProdus)
+class ListaFavoriteProdusAdmin(admin.ModelAdmin):
+    list_display = ('lista_favorite', 'produs')
+    search_fields = ('lista_favorite__nume_lista', 'produs__nume')

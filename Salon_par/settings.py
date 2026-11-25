@@ -87,7 +87,7 @@ DATABASES = {
         },
         'NAME': 'django_magazin_par',     # un string cu numele bazei de date
         'USER': 'utilizator',      # username-ul pentru conexiunea la baza de date
-        'PASSWORD': 'utilizator',  # parola userului creat în baza de date, cu care ne vom conecta
+        'PASSWORD': 'admin',  # parola userului creat în baza de date, cu care ne vom conecta
         'HOST': 'localhost',  # IP-ul serverului bazei de date (poate fi și localhost)
         'PORT': '5432',       # portul pentru PostgreSQL (pe care l-ați setat la instalare; portul implicit e 5432
     }
@@ -141,11 +141,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# MAILERS = {
+#     'default': {
+#         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+#     },
+# }
 
 DETALII_FIRMA = {
     "nume": "Salon Par - Dani Costi",
@@ -174,4 +174,12 @@ K_PRODUSE_SIMILARE = 3
 PROD_PER_PAG = 6
 STOC_MIN = 10
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587 
+EMAIL_USE_TLS = True 
+EMAIL_HOST_USER = 'lucautilizator675@gmail.com'
+EMAIL_HOST_PASSWORD = 'ouiiuvccyaadtpxd'
+DEFAULT_FROM_EMAIL = 'Manager <lucautilizator675@gmail.com>'
 
+AUTH_USER_MODEL = 'Magazin_produse_par.CustomUser'

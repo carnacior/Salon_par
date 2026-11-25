@@ -93,6 +93,16 @@
                         </span>
                     </a>
                 </p>
+                {% if produs.taguri %}
+                    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
+                        {% for tag in produs.taguri %}
+                            <a href="?tag={{ tag }}{% for t in taguri_active %}{% if t != tag %}&tag={{ t }}{% endif %}{% endfor %}&sort={{ sort_curent }}&col={{ col_curenta }}" 
+                                style="text-decoration: none; background-color: #e2e8f0; color: #333; padding: 3px 8px; border-radius: 10px; font-size: 0.85em; border: 1px solid #cbd5e1;">
+                                #{{ tag }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 <p><strong>Pret:</strong> {{ produs.pret }} RON</p>
                 {% if produs.stoc <= STOC_MIN %}
                     <p style="color: red; font-weight: bold; border: 2px solid red; padding: 5px; text-align: center; border-radius: 5px;">

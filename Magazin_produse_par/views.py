@@ -15,6 +15,14 @@ from .models import Produs, Ingredient, Categorie
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
+from django.core.mail import send_mail
+
+from .forms import CustomUserCreationForm
+from .models import Profil
+
+from django.contrib.auth import authenticate, login, logout
+from .forms import CustomUserCreationForm, CustomAuthenticationForm
+
 
 ZILE = [
     "Luni", "Marti", "Miercuri", "Joi",
@@ -77,7 +85,19 @@ class Accesare:
             return f"Astazi este {ZILE[self.data.weekday()]}, {self.data.day} {LUNI[self.data.month]} {self.data.year} si este ora {self.data.strftime("%H:%M:%S")}"
 
 
+def trimite_email():
+    send_mail(
+        subject='Salutare!',
+        message='Salut. Ce mai faci?',
+        html_message='<h1>Salut</h1><p>Ce mai faci?</p>',
+        from_email='lucautilizator675@gmail.com',
+        recipient_list=['lucautilizator675@gmail.com'],
+        fail_silently=False,
+    )
+
+
 def index(request):
+    trimite_email();
     inregistreaza(request)
     return render(request, "Magazin_produse_par/index.html")
 
@@ -384,3 +404,122 @@ def detalii_produs(request, slug):
         'STOC_MIN': settings.STOC_MIN,
     })
 
+####################lab6
+
+def inregistrare(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            
+            strada = form.cleaned_data.get('strada')
+            data_nasterii = form.cleaned_data.get('data_nasterii')
+            bio = form.cleaned_data.get('bio')
+            
+            if strada or data_nasterii or bio:
+                # daca a completat ceva, cream profilul
+                Profil.objects.create(
+                    user=user,
+                    strada=strada,
+                    data_nasterii=data_nasterii,
+                    bio=bio
+                )
+            
+            messages.success(request, "Contul a fost creat cu succes! Te poti loga.")
+            return redirect('login') # trimite la login dupa inregistrare
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'Magazin_produse_par/inregistrare.html', {'form': form})
+
+def login_view(request):
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            
+            if form.cleaned_data.get('tine_minte'):
+                request.session.set_expiry(86400)#secunde
+            else:
+                request.session.set_expiry(0)
+                
+            messages.success(request, f"Bine ai revenit, {user.username}!")
+            return redirect('profil')
+    else:
+        form = CustomAuthenticationForm()
+        
+    return render(request, 'Magazin_produse_par/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    messages.info(request, "Te-ai delogat cu succes.")
+    return redirect('index')
+
+def profil(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        profil_user = Profil.objects.get(user=request.user)
+    except Profil.DoesNotExist:
+        profil_user = None
+        
+    request.session['ultima_vizita_profil'] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    
+    ultima_vizita = request.session.get('ultima_vizita_profil')
+    
+    return render(request, 'Magazin_produse_par/profil.html', {
+        'profil_user': profil_user,
+        'ultima_vizita': ultima_vizita
+    })
+    
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+
+def schimba_parola(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user) #tine logat dupa schimbare
+            messages.success(request, "Parola a fost schimbata cu succes!")
+            return redirect('profil')
+        else:
+            messages.error(request, "Te rugam sa corectezi erorile de mai jos.")
+    else:
+        form = PasswordChangeForm(user=request.user)
+        
+    return render(request, 'Magazin_produse_par/schimba_parola.html', {'form': form})
+
+
+
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, UserUpdateForm, ProfilUpdateForm
+
+
+def editeaza_profil(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+        
+    profil_user, created = Profil.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfilUpdateForm(request.POST, instance=profil_user)
+        
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, "Datele au fost actualizate cu succes!")
+            return redirect('profil')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfilUpdateForm(instance=profil_user)
+        
+    return render(request, 'Magazin_produse_par/editeaza_profil.html', {
+        'u_form': u_form,
+        'p_form': p_form
+    })
